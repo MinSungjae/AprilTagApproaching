@@ -1,0 +1,78 @@
+# # Definitions of tags to detect
+#
+# ## General remarks
+#
+# - All length in meters
+# - 'size' refers to the length of the shared border between solid black and solid white rectangle.
+#   See README.md or https://github.com/AprilRobotics/apriltag/wiki/AprilTag-User-Guide#pose-estimation for details.
+# - Ellipsis (...) signifies that the previous element can be repeated multiple times.
+#
+# ## Standalone tag definitions
+# ### Remarks
+#
+# - name is optional
+#
+# ### Syntax
+#
+# standalone_tags:
+#   [
+#     {id: ID, size: SIZE, name: NAME},
+#     ...
+#   ]
+standalone_tags:
+  [
+# Experiment 117
+    {id: 256, size: 0.161, name: TAG256},
+    {id: 257, size: 0.161, name: TAG257},
+    {id: 258, size: 0.161, name: TAG258},
+    {id: 259, size: 0.161, name: TAG259},
+    {id: 260, size: 0.161, name: TAG260},
+    {id: 261, size: 0.161, name: TAG261},
+    {id: 262, size: 0.161, name: TAG262},
+
+# Whole 117
+    {id: 263, size: 0.161, name: TAG263},
+    {id: 264, size: 0.161, name: TAG264},
+    {id: 265, size: 0.161, name: TAG265},
+    {id: 266, size: 0.161, name: TAG266},
+    {id: 267, size: 0.161, name: TAG267},
+    {id: 268, size: 0.161, name: TAG268},
+    {id: 269, size: 0.161, name: TAG269},
+    {id: 270, size: 0.161, name: TAG270},
+    {id: 271, size: 0.161, name: TAG271},
+    {id: 272, size: 0.161, name: TAG272},
+    {id: 273, size: 0.161, name: TAG273},
+    {id: 274, size: 0.161, name: TAG274},
+    {id: 275, size: 0.161, name: TAG275},
+    {id: 276, size: 0.161, name: TAG276},
+    {id: 277, size: 0.161, name: TAG277},
+    {id: 278, size: 0.161, name: TAG278},
+    {id: 279, size: 0.161, name: TAG279},
+    {id: 280, size: 0.161, name: TAG280},
+    {id: 281, size: 0.161, name: TAG281},
+    {id: 282, size: 0.161, name: TAG282},
+  ]
+# ## Tag bundle definitions
+# ### Remarks
+#
+# - name is optional
+# - x, y, z have default values of 0 thus they are optional
+# - qw has default value of 1 and qx, qy, qz have default values of 0 thus they are optional
+#
+# ### Syntax
+#
+# tag_bundles:
+#   [
+#     {
+#       name: 'CUSTOM_BUNDLE_NAME',
+#       layout:
+#         [
+#           {id: ID, size: SIZE, x: X_POS, y: Y_POS, z: Z_POS, qw: QUAT_W_VAL, qx: QUAT_X_VAL, qy: QUAT_Y_VAL, qz: QUAT_Z_VAL},
+#           ...
+#         ]
+#     },
+#     ...
+#   ]
+tag_bundles:
+  [
+  ]

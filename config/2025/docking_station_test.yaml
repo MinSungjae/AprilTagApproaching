@@ -1,0 +1,39 @@
+### TAGS:
+###   - name: "SIGNBOARD01"
+###     target_pose: [x_offset, y_offset, z_offset, yaw_offset]
+TAGS:
+  - name: "SIGNBOARD01"
+    target_pose: [0.000, -0.300, 0.600, 000.0]
+
+  - name: "SIGNBOARD02"
+    target_pose: [0.000, -0.300, 0.600, 010.0]
+
+  - name: "SIGNBOARD03"
+    target_pose: [0.000, -0.300, 0.600, 000.0]
+
+  - name: "SIGNBOARD04"
+    target_pose: [0.000, -0.300, 0.600, 000.0]
+
+  - name: "SIGNBOARD05"
+    target_pose: [0.000, -0.300, 0.600, 000.0]
+
+  - name: "SIGNBOARD06"
+    target_pose: [0.000, -0.300, 0.600, 000.0]
+
+  - name: "SIGNBOARD07"
+    target_pose: [0.000, -0.300, 0.600, 000.0]
+
+  - name: "SIGNBOARD08"
+    target_pose: [0.000, -0.300, 0.600, 000.0]
+
+  - name: "SIGNBOARD09"
+    target_pose: [0.000, -0.300, 0.600, 000.0]
+
+  - name: "SIGNBOARD10"
+    target_pose: [0.000, -0.300, 0.600, 000.0]
+
+  - name: "SIGNBOARD11"
+    target_pose: [0.000, -0.300, 0.600, 000.0]
+
+  - name: "SIGNBOARD12"
+    target_pose: [0.000, -0.300, 0.600, 000.0]

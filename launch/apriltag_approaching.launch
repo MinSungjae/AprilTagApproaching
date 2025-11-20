@@ -1,0 +1,77 @@
+<launch>
+
+    <!-- ===================== Arguments ====================== -->
+    <arg name="tag_file_name"       default="2025/docking_station_test"/>
+    <arg name="camera_name"         default="camera"/>
+    <arg name="image_topic"         default="color/image_raw"/>
+
+    <arg name="threshold_dist2tag"  default="2.0"/>
+
+    <!-- Frames -->
+    <arg name="world_frame_name"    default="map"/>
+    <arg name="base_frame_name"     default="base_link"/>
+    <arg name="camera_frame_name"   default="camera_link"/>
+    <arg name="image_frame_name"    default="camera_color_optical_frame"/>
+
+    <arg name="with_apriltag_ros"   default="true"/>
+    <arg name="with_visualization"  default="true"/>
+    <arg name="with_realsense_tf"   default="false"/>
+
+    <arg name="broadcast_world2cam_tf" default="false"/>
+    <arg name="broadcast_world2base_tf" default="false"/>
+
+
+    <!-- ============ AprilTag Detection (apriltag_ros)(TF 프레임 tag_<id> 또는 tag_<name> 생성) ============ -->
+    <group if="$(arg with_apriltag_ros)">
+        <include file="$(find apriltag_ros)/launch/continuous_detection.launch">
+            <arg name="camera_name" value="$(arg camera_name)"/>
+            <arg name="image_topic" value="$(arg image_topic)"/>
+        </include>
+    </group>
+
+
+    <!-- ========================== New TF-based “Approaching / Alignment” Node ========================== -->
+    <node name="apriltag_approaching_node"
+            pkg="apriltag_approaching"
+            type="apriltag_approaching_node"
+            output="screen">
+
+        <!-- Tag → Target baselink config -->
+        <param name="tag_config_name" value="$(arg tag_file_name)"/>
+
+        <!-- TF Frames -->
+        <param name="world_frame_name"   value="$(arg world_frame_name)"/>
+        <param name="base_frame_name"    value="$(arg base_frame_name)"/>
+        <param name="camera_frame_name"  value="$(arg camera_frame_name)"/>
+        <param name="image_frame_name"   value="$(arg image_frame_name)"/>
+
+        <!-- Dist threshold -->
+        <param name="threshold_dist"     value="$(arg threshold_dist2tag)"/>
+
+        <!-- Broadcast options -->
+        <param name="broadcast_world2cam_tf"  value="$(arg broadcast_world2cam_tf)"/>
+        <param name="broadcast_world2base_tf" value="$(arg broadcast_world2base_tf)"/>
+    </node>
+
+
+    <!-- =============================== Visualization (optional) =============================== -->
+    <group if="$(arg with_visualization)">
+        <node name="apriltag_approaching_visualization"
+                pkg="rviz"
+                type="rviz"
+                args="-d $(find apriltag_approaching)/rviz/rviz_config.rviz"/>
+    </group>
+
+
+    <!-- =========================== RealSense TF publishing (optional) =========================== -->
+    <group if="$(arg with_realsense_tf)">
+        <param name="robot_description"
+                command="$(find xacro)/xacro --inorder '$(find realsense2_description)/urdf/test_d435i_camera.urdf.xacro' use_nominal_extrinsics:=true" />
+        <node name="realsense_tf_publisher"
+                pkg="robot_state_publisher"
+                type="robot_state_publisher"/>
+    </group>
+
+    <node pkg="tf" type="static_transform_publisher" name="static_base_to_camera" args="0.3 0 0.3 0 0 0 base_link camera_link 100"/>
+
+</launch>
