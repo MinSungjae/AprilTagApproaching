@@ -1,115 +1,135 @@
-# AprilTag Localization
-#### Localize camera frame with respect to world frame with known transformation of tag's w.r.t. world.
-It publishes <geometry_msgs::PoseStamped> topic named with exactly same with the "camera_frame_name" argument in launch file
+# AprilTag Approaching
+This package computes the desired target pose relative to the robot’s base_link frame using a predefined geometric relation between each AprilTag and its corresponding alignment or docking target.
 
+It publishes the following topics:
+> /target_baselink_pose (geometry_msgs::PoseStamped)
+>/alignment_error (geometry_msgs::PoseStamped)
+
+It also publishes one TF frame per tag:
+
+<tag_name> → <tag_name>_target
+
+This package works purely in local coordinates (base_link frame).
+No global “world” or “map” frame is needed.
 
 ## Dependencies
 
-To install the dependent packages, please follow their instructions. </br>
+Install AprilTag and apriltag_ros:
 
-You have to install both packages. Apriltag_ros depends on Apriltag.
-
-[APRILTAG](https://github.com/AprilRobotics/apriltag)
-
-[APRILTAG_ROS](https://github.com/AprilRobotics/apriltag_ros)
-
-I recommend you to do binary installation.
 ```
-sudo apt install ros-[YOUR_ROS_DISTRO]-apriltag ros-[YOUR_ROS_DISTRO]-apriltag-ros
+  sudo apt install ros-[YOUR_ROS_DISTRO]-apriltag
+  sudo apt install ros-[YOUR_ROS_DISTRO]-apriltag-ros
 ```
 
-## Installiation
-
-Clone TRUE_RT_TAG package to you_ws/src to install
+## Installation
 ```
-cd your_ws/src
-git clone https://github.com/MinSungjae/AprilTagLocalization
+  cd your_ws/src
+  git clone https://github.com/MinSungjae/AprilTagApproaching
 
-cd your_ws/
-catkin_make
+  cd your_ws
+  catkin_make
 ```
+## Configuration
 
-#### Who are suffering OpenCV dependency error while building True RT TAG with AprilTag
-Try install opencv3.2 library. You may have broken installation about OpenCV.
-```
-sudo apt install libopencv3.2
-```
+3.1 AprilTag (apriltag_ros) configuration
 
-## Usage
-
-Before starting, you have to configure the AprilTag ROS package to detect tags. </br>
-
-To configure, go to the Apriltag ROS package directory and open tags.yaml file with a text file editor.
-
+Edit the tag definitions:
 ```
 roscd apriltag_ros/config
-sudo gedit tags.yaml
-```
-if you install AprilTag package with source(git clone AprilTag), then you can just edit without sudo command.
-
-
-Add tag information into standalone_tags:
-```
-standalone_tags:
-[
-    {id: 256, size: 0.16, name: TAG256},
-    {id: 257, size: 0.16, name: TAG257},
-    {id: 258, size: 0.16, name: TAG258},
-    ... # Define tags 
-]
-```
-If you are finished edit, save, and close the file.
-
-These are for the AprilTag detections.
-
-
-And let's configure True_RT_Tag.
-Go to the True_RT_Tag package directory and edit the configuration file.
-```
-roscd aprilatag_localization/config
-gedit [FILE NAME].yaml
-```
-And you have to define Tag's information about you in apriltag_ros/config/tags.yaml
-
-```
-##### TAG DEFINITION OF ENVIRONMENT #####
-# [ID, SIZE(m), X(m), Y(m), Z(m), psi(Deg)]
-TAG_TRUE_RT:
-  TAGS:
-    - [256, 0.16, 1.00, 0.00, 1.000, 0.0]
-    - [257, 0.16, 0.25, 0.75, 1.000, 90.0]
-    - [258, 0.16, 0.50, 0.75, 1.000, 90.0]
-    ... # Define tags
+gedit tags.yaml
 ```
 
-Because we assume that Tags will be on the wall, theta and phi are fixed to constant.
-You have to define all tags, with size, X-Y-Z position, and psi(heading angle).
-Direction angle psi is defined as 0 when facing the X-axis of the world coordinate system and follows right-hand rules.
-Default coordinate system in ROS is defined as X(front), Y(left), and Z(up).
-
-You can define your own Tag configuration file to test your robot in any environment.
-Just make a new file with the same format and define a config that matches your environment.
-
-## Launch
-
-You can launch the True_RT_Tag package with
+Example:
 ```
-roslaunch aprilatag_localization aprilatag_localization.launch
+  standalone_tags:
+  [
+  {id: 10, size: 0.161, name: SIGNBOARD01},
+  {id: 11, size: 0.161, name: SIGNBOARD02}
+  ]
 ```
 
-also, you can modify the launch argument below </br>
-```
-broadcast_world2cam_tf    // True when only testing standalone.
-world_frame_name          //  World frame name
-camera_frame_name         // Camera's mount frame
-image_frame_name          // Optical frame of image
-tag_file_name             // Tag config file name
-```
-Camera frame have to be broadcasted w.r.t. base_link in your TF managing package.
-Also, TF of RealSense's internal transformation, for example camera_mount2camera_color_optical_frame, can be published with URDF of RealSense and robot state publisher. (Hint! Please carefully check True RT Tag launch file.)
+3.2 Approaching target configuration
 
-If you want to launch with your own environment tag configuration file, you can launch with
+Configuration files are located inside:
+
+roscd apriltag_approaching/config
+
+Example file format:
+
 ```
-roslaunch aprilatag_localization aprilatag_localization.launch tag_file_name:=[YOUR_CONFIG_FILE_NAME]
+TAGS:
+name: SIGNBOARD01
+target_pose: [0.50, 0.00, 0.00, 0.0]
+
+name: SIGNBOARD02
+target_pose: [0.40, 0.10, 0.00, 180.0]
 ```
-(without extension (.yaml))
+
+Meaning of target_pose:
+x, y, z: desired target position relative to the tag frame
+yaw(deg): additional heading that robot should achieve at target
+
+The final target orientation is computed using two components:
+> q_face_alignment : rotates robot front-left-up so it faces the tag
+> q_config_heading : rotation from the YAML heading parameter
+
+Final orientation = q_face_alignment * q_config_heading
+
+TF Requirements and Outputs
+
+Required from your robot system:
+
+base_link → camera_link
+
+camera_link → camera_optical_frame
+
+Published by this package:
+
+tag_name → tag_name_target (static position + computed orientation)
+
+Topics published:
+
+target_baselink_pose (in base_link frame)
+
+alignment_error (same as base→target transform)
+
+Launching the Node
+
+Example launch file:
+
+```
+  <node name="apriltag_approaching" pkg="apriltag_approaching" type="apriltag_approaching_node" output="screen"> <param name="tag_config_name" value="my_docking_config" /> <param name="base_frame_name" value="base_link" /> <param name="threshold_dist" value="2.0" /> </node>
+```
+You must also run apriltag_ros detector:
+
+roslaunch apriltag_ros continuous_detection.launch camera_name:=camera image_topic:=color/image_raw
+
+How It Works (Pipeline)
+
+apriltag_ros publishes TF: camera → tag frame
+
+We compute base_link → tag using TF lookup
+
+From config, we read tag → target offset
+
+Combine to compute base_link → target
+
+Publish:
+
+target_baselink_pose
+
+alignment_error
+
+tag → tag_target TF
+
+The robot controller can subscribe to /alignment_error and drive the robot until the error converges to zero.
+
+## Notes
+
+The package does NOT estimate global pose.
+
+Everything is computed in robot local coordinates.
+
+Ideal for docking, approach, or fine alignment tasks.
+
+Requires consistent TF between base_link and camera_link.
